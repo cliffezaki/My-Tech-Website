@@ -24,6 +24,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --color-brand-red: hsl(var(--brand-red));
+  
+  /* Font families */
+  --font-headline: var(--font-playfair);
+  --font-body: var(--font-inter);
 }
 
 :root {

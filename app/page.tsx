@@ -1,57 +1,35 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Smartphone, Bot } from "lucide-react";
 import Link from "next/link";
+import { client } from "@/sanity/lib/client";
+import { urlForImage } from "@/sanity/lib/image";
+import { MOCK_DATA } from "@/lib/mock-data";
 
-export default function Home() {
-  const smartphoneReviews = [
-    {
-      id: 1,
-      title: "iPhone 16 Pro Review",
-      description: "The refine-ment King. Better cameras, new button, same soul.",
-      category: "Review",
-      date: "2 hours ago",
-    },
-    {
-      id: 2,
-      title: "Google Pixel 9 Pro",
-      description: "AI in your pocket. The smartest smartphone gets a major design overhaul.",
-      category: "Review",
-      date: "4 hours ago",
-    },
-    {
-      id: 3,
-      title: "Samsung Galaxy S25 Ultra",
-      description: "Titanium perfection? testing the limits of Android performance.",
-      category: "Hands-on",
-      date: "1 day ago",
-    },
-    {
-      id: 4,
-      title: "Nothing Phone (3)",
-      description: "Transparent design meets flagship specs. Is it enough?",
-      category: "First Look",
-      date: "2 days ago",
-    },
-  ];
+async function getSmartphoneReviews() {
+  try {
+    const query = `*[_type == "article" && category == "Smartphone" && section == "reviews"] | order(publishedAt desc)[0...4] {
+      _id,
+      title,
+      excerpt,
+      category,
+      publishedAt,
+      mainImage,
+      "slug": slug.current
+    }`;
+    const data = await client.fetch(query);
+    return data.length > 0 ? data : null;
+  } catch (error) {
+    console.warn("Sanity fetch failed, falling back to mock data:", error);
+    return null;
+  }
+}
 
-  const aiNews = [
-    {
-      id: 1,
-      title: "AGI Achieved internally?",
-      description: "Rumors swirl as tech giant claims breakthrough in reasoning models.",
-    },
-    {
-      id: 2,
-      title: "The Agentic Web is Here",
-      description: "How autonomous agents are rewriting the rules of the internet.",
-    },
-    {
-      id: 3,
-      title: "Open Source Llama 4",
-      description: "Meta releases its most powerful model yet, beating proprietary systems.",
-    },
-  ];
+export default async function Home() {
+  const sanityReviews = await getSmartphoneReviews();
+
+  // Use Sanity data if available, otherwise use mock data
+  const smartphoneReviews = sanityReviews || MOCK_DATA.smartphoneReviews;
 
   return (
     <div className="flex flex-col gap-10 pb-10">
@@ -87,7 +65,7 @@ export default function Home() {
           {/* Smartphone Reviews - Main Feed (Left 8 cols) */}
           <div className="lg:col-span-8 space-y-8">
             <div className="flex items-center justify-between border-b pb-4">
-              <h2 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+              <h2 className="flex items-center gap-2 text-3xl font-bold tracking-tight font-[family-name:var(--font-playfair)]">
                 <Smartphone className="h-6 w-6" /> Smartphone Reviews
               </h2>
               <Link href="/reviews" className="text-sm font-medium hover:underline text-muted-foreground">
@@ -96,21 +74,33 @@ export default function Home() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-              {smartphoneReviews.map((review) => (
-                <Card key={review.id} className="group overflow-hidden border-0 bg-secondary/20 hover:bg-secondary/40 transition-colors">
-                  {/* Placeholder Image Div */}
-                  <div className="aspect-video w-full bg-muted/50 group-hover:bg-muted/70 transition-colors"></div>
+              {smartphoneReviews.map((review: any) => (
+                <Card key={review.id || review._id} className="group overflow-hidden border-0 bg-secondary/20 hover:bg-secondary/40 transition-colors">
+                  {/* Featured Image */}
+                  <div className="aspect-video w-full bg-muted/50 group-hover:bg-muted/70 transition-colors relative overflow-hidden">
+                    {review.mainImage ? (
+                      <img
+                        src={urlForImage(review.mainImage).url()}
+                        alt={review.title}
+                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted/30">
+                        <Smartphone className="h-8 w-8 opacity-20" />
+                      </div>
+                    )}
+                  </div>
                   <CardHeader>
                     <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       <span>{review.category}</span>
-                      <span>{review.date}</span>
+                      <span>{review.publishedAt ? new Date(review.publishedAt).toLocaleDateString() : (review.date || "Just now")}</span>
                     </div>
-                    <CardTitle className="text-xl text-brand-red decoration-brand-red decoration-2 underline-offset-4 hover:underline transition-colors">
-                      <Link href={`/reviews/${review.id}`}>{review.title}</Link>
+                    <CardTitle className="text-xl decoration-2 underline-offset-4 hover:underline transition-colors font-[family-name:var(--font-playfair)]">
+                      <Link href={`/reviews/${review.slug}`}>{review.title}</Link>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">{review.description}</p>
+                    <p className="text-muted-foreground line-clamp-2">{review.excerpt || review.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -121,13 +111,13 @@ export default function Home() {
           <div className="lg:col-span-4 space-y-8">
             <div className="border-l pl-8 space-y-8">
               <div className="border-b pb-4">
-                <h3 className="text-xl font-bold tracking-tight">Trending in AI</h3>
+                <h3 className="text-xl font-bold tracking-tight font-[family-name:var(--font-playfair)]">Trending in AI</h3>
               </div>
               <div className="flex flex-col gap-6">
-                {aiNews.map((news) => (
+                {MOCK_DATA.aiNews.map((news) => (
                   <div key={news.id} className="group cursor-pointer space-y-2">
                     <div className="text-xs font-semibold uppercase text-brand-red">Hot Topic</div>
-                    <h4 className="text-lg font-bold leading-tight text-brand-red transition-colors hover:underline">
+                    <h4 className="text-lg font-bold leading-tight transition-colors hover:underline font-[family-name:var(--font-playfair)]">
                       {news.title}
                     </h4>
                     <p className="text-sm text-muted-foreground line-clamp-2">
@@ -139,7 +129,7 @@ export default function Home() {
 
               {/* Newsletter Box */}
               <div className="mt-8 rounded-lg bg-primary p-6 text-primary-foreground">
-                <h4 className="text-lg font-bold mb-2">TechAI Weekly</h4>
+                <h4 className="text-lg font-bold mb-2 font-[family-name:var(--font-playfair)]">TechAI Weekly</h4>
                 <p className="text-sm opacity-90 mb-4">Get the future in your inbox. No spam, just signal.</p>
                 <div className="flex gap-2">
                   <input type="email" placeholder="Email" className="w-full rounded bg-primary-foreground/10 px-3 py-2 text-sm placeholder:text-primary-foreground/50 border border-primary-foreground/20 focus:outline-none focus:ring-1 focus:ring-primary-foreground" />

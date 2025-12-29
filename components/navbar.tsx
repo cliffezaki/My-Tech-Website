@@ -36,14 +36,10 @@ export function Navbar() {
                             <Menu className="h-6 w-6" />
                         </Button>
 
-                        {/* Logo - WIRED Style: Each letter in own block */}
-                        <Link href="/" className="flex items-baseline gap-[2px] group">
-                            <span className="text-xl md:text-2xl font-black uppercase bg-white text-black px-1.5 py-1 border border-black leading-none">T</span>
-                            <span className="text-xl md:text-2xl font-black uppercase bg-white text-black px-1.5 py-1 border border-black leading-none">E</span>
-                            <span className="text-xl md:text-2xl font-black uppercase bg-white text-black px-1.5 py-1 border border-black leading-none">C</span>
-                            <span className="text-xl md:text-2xl font-black uppercase bg-white text-black px-1.5 py-1 border border-black leading-none">H</span>
-                            <span className="text-xl md:text-2xl font-black uppercase bg-black text-white px-1.5 py-1 leading-none">A</span>
-                            <span className="text-xl md:text-2xl font-black uppercase bg-black text-white px-1.5 py-1 leading-none">I</span>
+                        {/* Logo - TECH (plain text) + AI (white on black block) */}
+                        <Link href="/" className="flex items-baseline gap-0.5 group">
+                            <span className="text-xl md:text-2xl font-black uppercase text-black dark:text-white leading-none">TECH</span>
+                            <span className="text-xl md:text-2xl font-black uppercase bg-black text-white dark:bg-white dark:text-black px-1.5 py-1 leading-none">AI</span>
                         </Link>
                     </div>
 
@@ -54,6 +50,12 @@ export function Navbar() {
                             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground tracking-wider"
                         >
                             News
+                        </Link>
+                        <Link
+                            href="/reviews"
+                            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground tracking-wider"
+                        >
+                            Smartphone Reviews
                         </Link>
                         <Link
                             href="/how-to"
@@ -99,20 +101,16 @@ export function Navbar() {
                 <div className="fixed inset-0 z-50 flex">
                     {/* Backdrop */}
                     <div
-                        className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/35 dark:bg-black/50"
                         onClick={() => setIsMenuOpen(false)}
                     />
 
                     {/* Sidebar Content */}
                     <div className="relative w-3/4 max-w-xs border-r bg-white dark:bg-gray-950 p-6 shadow-lg animate-in slide-in-from-left duration-300">
                         <div className="flex items-center justify-between mb-8">
-                            <Link href="/" className="flex items-baseline gap-[2px]" onClick={() => setIsMenuOpen(false)}>
-                                <span className="text-base font-black uppercase bg-white text-black px-1 py-0.5 border border-black leading-none">T</span>
-                                <span className="text-base font-black uppercase bg-white text-black px-1 py-0.5 border border-black leading-none">E</span>
-                                <span className="text-base font-black uppercase bg-white text-black px-1 py-0.5 border border-black leading-none">C</span>
-                                <span className="text-base font-black uppercase bg-white text-black px-1 py-0.5 border border-black leading-none">H</span>
-                                <span className="text-base font-black uppercase bg-black text-white px-1 py-0.5 leading-none">A</span>
-                                <span className="text-base font-black uppercase bg-black text-white px-1 py-0.5 leading-none">I</span>
+                            <Link href="/" className="flex items-baseline gap-0.5" onClick={() => setIsMenuOpen(false)}>
+                                <span className="text-base font-black uppercase text-black dark:text-white leading-none">TECH</span>
+                                <span className="text-base font-black uppercase bg-black text-white dark:bg-white dark:text-black px-1 py-0.5 leading-none">AI</span>
                             </Link>
                             <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
                                 <X className="h-5 w-5" />
@@ -122,35 +120,42 @@ export function Navbar() {
                         <nav className="flex flex-col">
                             <Link
                                 href="/news"
-                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3"
+                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3 font-[family-name:var(--font-playfair)]"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 News
                             </Link>
                             <Link
+                                href="/reviews"
+                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3 font-[family-name:var(--font-playfair)]"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Smartphone Reviews
+                            </Link>
+                            <Link
                                 href="/how-to"
-                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3"
+                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3 font-[family-name:var(--font-playfair)]"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 How To
                             </Link>
                             <Link
                                 href="/how-stuff-works"
-                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3"
+                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3 font-[family-name:var(--font-playfair)]"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 How Stuff Works
                             </Link>
                             <Link
                                 href="/tech-kenya"
-                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3"
+                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3 font-[family-name:var(--font-playfair)]"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 Tech Kenya
                             </Link>
                             <Link
                                 href="/contact"
-                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3"
+                                className="text-lg font-medium transition-colors hover:text-brand-red border-b py-3 font-[family-name:var(--font-playfair)]"
                                 onClick={() => setIsMenuOpen(false)}
                             >
                                 Contact

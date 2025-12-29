@@ -1,52 +1,112 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "lucide-react"; // Wait, I don't have Badge component, just icon. 
-// I'll stick to text badge for now or create a Badge component if needed. 
-// Actually I listed "Badge" in the task list but didn't create it. Simple span is fine.
+import { ArticleCard } from "@/components/article-card";
+import { ArticleGrid } from "@/components/article-grid";
+import { HeroSection } from "@/components/hero-section";
+import { SectionHeading } from "@/components/section-heading";
+import { client } from "@/sanity/lib/client";
+import { urlForImage } from "@/sanity/lib/image";
+import { MOCK_DATA } from "@/lib/mock-data";
 
-export default function HowToPage() {
-    const guides = [
-        {
-            id: 1,
-            title: "How to run Llama 3 locally on your Mac",
-            difficulty: "Medium",
-            time: "15 min"
-        },
-        {
-            id: 2,
-            title: "Optimizing Next.js for maximum SEO",
-            difficulty: "Hard",
-            time: "30 min"
-        },
-        {
-            id: 3,
-            title: "Switching from Android to iOS: The complete guide",
-            difficulty: "Easy",
-            time: "10 min"
-        },
-        {
-            id: 4,
-            title: "Building a custom mechanical keyboard",
-            difficulty: "Hard",
-            time: "2 hours"
-        }
-    ];
+async function getHowToArticles() {
+    try {
+        const query = `*[_type == "article" && section == "how-to"] | order(publishedAt desc) {
+        _id,
+        title,
+        excerpt,
+        category,
+        publishedAt,
+        mainImage,
+        readTime,
+        author,
+        "slug": slug.current
+      }`;
+        const data = await client.fetch(query);
+        return data.length > 0 ? data : null;
+    } catch (err) {
+        console.warn("Sanity How-To fetch failed:", err);
+        return null;
+    }
+}
+
+export default async function HowToPage() {
+    const articles = await getHowToArticles();
+
+    let featuredGuide;
+    let topStories;
+    let gridGuides;
+
+    if (articles && articles.length > 0) {
+        const featuredArticleRaw = articles[0];
+
+        featuredGuide = {
+            id: featuredArticleRaw._id,
+            category: featuredArticleRaw.category || "Guide",
+            title: featuredArticleRaw.title,
+            excerpt: featuredArticleRaw.excerpt,
+            author: featuredArticleRaw.author || "TechAI Staff",
+            readTime: featuredArticleRaw.readTime || "15 min read",
+            href: `/how-to/${featuredArticleRaw.slug}`,
+            imageUrl: featuredArticleRaw.mainImage ? urlForImage(featuredArticleRaw.mainImage).url() : undefined
+        };
+
+        topStories = articles.slice(1, 3).map((article: any) => ({
+            id: article._id,
+            category: article.category || "Guide",
+            title: article.title,
+            excerpt: article.excerpt,
+            author: article.author || "TechAI Staff",
+            readTime: article.readTime || "10 min read",
+            href: `/how-to/${article.slug}`,
+            imageUrl: article.mainImage ? urlForImage(article.mainImage).url() : undefined
+        }));
+
+        gridGuides = articles.slice(3).map((article: any) => ({
+            id: article._id,
+            category: article.category || "Guide",
+            title: article.title,
+            excerpt: article.excerpt,
+            author: article.author || "TechAI Staff",
+            readTime: article.readTime || "10 min read",
+            href: `/how-to/${article.slug}`,
+            imageUrl: article.mainImage ? urlForImage(article.mainImage).url() : undefined
+        }));
+    } else {
+        featuredGuide = {
+            ...MOCK_DATA.howTo[0],
+            id: 881,
+            href: `/how-to/${MOCK_DATA.howTo[0].slug}`
+        };
+
+        // Mock top stories
+        topStories = [MOCK_DATA.howTo[1]].map(s => ({ ...s, href: `/how-to/${s.slug}` }));
+
+        // Mock grid
+        gridGuides = MOCK_DATA.howTo.map((s, i) => ({
+            ...s,
+            id: `guide-${i}`,
+            href: `/how-to/${s.slug}`
+        }));
+    }
 
     return (
-        <div className="container mx-auto px-4 py-12">
-            <h1 className="text-4xl font-bold tracking-tight mb-8">How To Guides</h1>
-            <div className="grid gap-6">
-                {guides.map((guide) => (
-                    <Card key={guide.id} className="flex flex-col md:flex-row items-center p-6 gap-6 hover:bg-secondary/20 transition-colors">
-                        <div className="flex-1 space-y-2">
-                            <CardTitle>{guide.title}</CardTitle>
-                            <div className="flex gap-4 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">⏱ {guide.time}</span>
-                                <span className="flex items-center gap-1">📊 {guide.difficulty}</span>
-                            </div>
-                        </div>
-                    </Card>
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+            <SectionHeading title="How To Guides" subtitle="Step-by-step tutorials for the modern web" />
+
+            <HeroSection featuredArticle={featuredGuide} topStories={topStories} />
+
+            <ArticleGrid>
+                {gridGuides.map((item: any) => (
+                    <ArticleCard
+                        key={item.id}
+                        title={item.title}
+                        excerpt={item.excerpt}
+                        category={item.category}
+                        author={item.author}
+                        readTime={item.readTime}
+                        href={item.href}
+                        imageUrl={item.imageUrl}
+                    />
                 ))}
-            </div>
+            </ArticleGrid>
         </div>
     );
 }

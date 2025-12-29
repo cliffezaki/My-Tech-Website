@@ -6,106 +6,102 @@ import { client } from "@/sanity/lib/client";
 import { urlForImage } from "@/sanity/lib/image";
 import { MOCK_DATA } from "@/lib/mock-data";
 
-async function getNewsArticles() {
+async function getReviewArticles() {
     try {
-        const query = `*[_type == "article" && section == "news"] | order(publishedAt desc) {
-      _id,
-      title,
-      excerpt,
-      category,
-      publishedAt,
-      mainImage,
-      readTime,
-      author,
-      "slug": slug.current
-    }`;
+        const query = `*[_type == "article" && section == "reviews"] | order(publishedAt desc) {
+        _id,
+        title,
+        excerpt,
+        category,
+        publishedAt,
+        mainImage,
+        readTime,
+        author,
+        "slug": slug.current
+      }`;
         const data = await client.fetch(query);
         return data.length > 0 ? data : null;
-    } catch (error) {
-        console.warn("Sanity news fetch failed:", error);
+    } catch (err) {
+        console.warn("Sanity reviews fetch failed:", err);
         return null;
     }
 }
 
-export default async function NewsPage() {
-    const articles = await getNewsArticles();
+export default async function ReviewsPage() {
+    const articles = await getReviewArticles();
 
-    // LOGIC: Use Sanity data if exists, otherwise fallback to MOCK_DATA
-
-    let featuredNews;
+    let featuredReview;
     let topStories;
-    let gridNews;
+    let gridReviews;
 
     if (articles && articles.length > 0) {
-        // ---- CMS DATA PATH ----
-        // 1. Featured
+        // CMS PATH
         const featuredRaw = articles[0];
-        featuredNews = {
+        featuredReview = {
             id: featuredRaw._id,
-            category: featuredRaw.category || "News",
+            category: featuredRaw.category || "Review",
             title: featuredRaw.title,
             excerpt: featuredRaw.excerpt,
-            author: featuredRaw.author || "Staff Writer",
+            author: featuredRaw.author || "Staff",
             readTime: featuredRaw.readTime || "5 min read",
-            href: `/news/${featuredRaw.slug}`,
+            href: `/reviews/${featuredRaw.slug}`,
             imageUrl: featuredRaw.mainImage ? urlForImage(featuredRaw.mainImage).url() : undefined
         };
 
-        // 2. Top Stories
         topStories = articles.slice(1, 3).map((article: any) => ({
             id: article._id,
-            category: article.category || "News",
+            category: article.category || "Review",
             title: article.title,
             excerpt: article.excerpt,
-            author: article.author || "Staff Writer",
+            author: article.author || "Staff",
             readTime: article.readTime || "5 min read",
-            href: `/news/${article.slug}`,
+            href: `/reviews/${article.slug}`,
             imageUrl: article.mainImage ? urlForImage(article.mainImage).url() : undefined
         }));
 
-        // 3. Grid
-        gridNews = articles.slice(3).map((article: any) => ({
+        gridReviews = articles.slice(3).map((article: any) => ({
             id: article._id,
+            category: article.category || "Review",
             title: article.title,
             excerpt: article.excerpt,
-            category: article.category || "News",
-            author: article.author || "Staff Writer",
+            author: article.author || "Staff",
             readTime: article.readTime || "5 min read",
-            href: `/news/${article.slug}`,
+            href: `/reviews/${article.slug}`,
             imageUrl: article.mainImage ? urlForImage(article.mainImage).url() : undefined
         }));
 
     } else {
-        // ---- FALLBACK PATH (MOCK DATA) ----
-        featuredNews = {
-            ...MOCK_DATA.featuredNews,
-            id: 999, // dummy id
-            href: "/news/featured-article-slug"
+        // FALLBACK PATH
+        featuredReview = {
+            ...MOCK_DATA.reviews[0],
+            id: 991,
+            href: `/reviews/${MOCK_DATA.reviews[0].slug}`
         };
 
-        topStories = MOCK_DATA.topStories.map((s, i) => ({
-            ...s,
-            id: `top-${i}`,
-            href: `/news/top-story-${i}`,
-            author: s.meta.replace('By ', ''), // quick hack to adapt data format
-            readTime: "4 min read"
+        topStories = MOCK_DATA.reviews.slice(1, 3).map(r => ({
+            ...r,
+            href: `/reviews/${r.slug}`
         }));
 
-        gridNews = MOCK_DATA.gridNews.map(item => ({
-            ...item,
-            href: `/news/${item.slug}`,
-            imageUrl: undefined
+        // Reuse some reviews for grid to fill space
+        gridReviews = [
+            ...MOCK_DATA.reviews,
+            ...MOCK_DATA.reviews
+        ].map((r, i) => ({
+            ...r,
+            id: `grid-${i}`,
+            href: `/reviews/${r.slug}`
         }));
     }
 
     return (
         <div className="container mx-auto px-4 py-12 max-w-7xl">
-            <SectionHeading title="Latest News" subtitle="Breaking stories from the world of technology" />
+            <SectionHeading title="Smartphone Reviews" subtitle="In-depth analysis of the latest hardware" />
 
-            <HeroSection featuredArticle={featuredNews} topStories={topStories} />
+            <HeroSection featuredArticle={featuredReview} topStories={topStories} />
 
             <ArticleGrid>
-                {gridNews.map((item: any) => (
+                {gridReviews.map((item: any) => (
                     <ArticleCard
                         key={item.id}
                         title={item.title}
